@@ -1,25 +1,5 @@
-# Tris Drive PWA v3 Sport
+# Tris Drive PWA v4 GT
 
-Sportier dashboard redesign for GitHub Pages.
+Upload these files to your GitHub Pages repo root. Keep your existing greeting1.mp3, greeting2.mp3 and greeting3.mp3 in the same folder.
 
-## Upload / replace on GitHub
-
-Replace these files in your repository root:
-
-- `index.html`
-- `styles.css`
-- `app.js`
-- `manifest.json`
-- `sw.js`
-- `assets/` folder
-
-Commit changes to `main`. GitHub Pages will redeploy automatically.
-
-## Changes
-
-- Sport+ dashboard layout
-- Larger central tachometer-style speed ring
-- Redline / GT styling
-- Spotify retained
-- Theme choices: Sport+, Track Red, GT Blue, Stealth
-- Better landscape driving display
+Open `/welcome.html` first, or rename `welcome.html` to `index.html` and rename the dashboard file to `dashboard.html` if you want the welcome screen to be the default page.
