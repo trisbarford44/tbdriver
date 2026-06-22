@@ -1,23 +1,4 @@
-# Tris Drive PWA v4.1 Responsive
+# Tris Drive PWA v4.2 Fit
+Responsive Sport GT+ dashboard built to fit iPhone, iPad, desktop and landscape displays without scrolling.
 
-Upload/replace these files in your GitHub `tbdriver` repo:
-
-- `welcome.html`
-- `index.html`
-- `styles.css`
-- `app.js`
-- `manifest.json`
-
-Keep your existing audio files:
-
-- `greeting1.mp3`
-- `greeting2.mp3`
-- `greeting3.mp3`
-
-## What changed
-
-- Dashboard now fits one screen using responsive `100dvh` sizing.
-- iPhone portrait uses compact vertical layout.
-- iPhone landscape uses wide cockpit layout.
-- iPad/desktop uses wider GT layout.
-- Buttons remain ordered: Spotify, Waze, Phone, Maps.
+Replace: index.html, styles.css, app.js, manifest.json. Keep greeting MP3s.
