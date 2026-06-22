@@ -27,3 +27,8 @@ Sidebar options:
 - Shortcut buttons toggle
 - Reset trip data
 - Restore defaults
+
+
+## v4.5 Speed Number Colour
+
+The central speed number now follows the active speed colour band as the ring changes: green, blue, amber, red. Replace `styles.css` and `app.js` if upgrading from v4.4.
