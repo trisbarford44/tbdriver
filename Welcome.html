@@ -3,16 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <title>Welcome</title>
+    <style>
+        body {
+            background-color: #0b0b0b;
+            color: #24523b; /* British Racing Green */
+            text-align: center;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #waveform {
+            width: 80%;
+            height: 150px;
+            background: #24523b;
+            margin: 20px auto;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            from { transform: scaleY(1); }
+            to { transform: scaleY(1.5); }
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome, Tris!</h1>
-
-    <audio id="welcome-audio" autoplay>
-        Your browser does not support the audio element.
-    </audio>
-
+    <div>
+        <h1>Welcome, Tris!</h1>
+        <div id="waveform"></div>
+    </div>
+    <audio id="welcome-audio" autoplay></audio>
     <script>
-        // List of audio files
         const audioFiles = ["greeting1.mp3", "greeting2.mp3", "greeting3.mp3"];
-
-        // Retrieve the last played index from session storage
+        const lastIndex = sessionStorage.getItem("lastGreetingIndex");
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * audioFiles.length);
+        } while (newIndex.toString() === lastIndex);
+        sessionStorage.setItem("lastGreetingIndex", newIndex);
+        document.getElementById("welcome-audio").src = audioFiles[newIndex];
+        setTimeout(function() {
+            window.location.href = "index.html";
+        }, 5000); // 5-second delay
+    </script>
+</body>
+</html>
