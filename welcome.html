@@ -1,51 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Welcome</title>
-    <style>
-        body {
-            background-color: #0b0b0b;
-            color: #24523b; /* British Racing Green */
-            text-align: center;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        #waveform {
-            width: 80%;
-            height: 150px;
-            background: #24523b;
-            margin: 20px auto;
-            animation: pulse 2s infinite alternate;
-        }
-        @keyframes pulse {
-            from { transform: scaleY(1); }
-            to { transform: scaleY(1.5); }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sport GT+ Welcome</title>
+
+  <style>
+    :root {
+      --black: #020403;
+      --green: #00ff8a;
+      --brg: #004225;
+      --blue: #00b7ff;
+      --white: #f2f7f5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background:
+        radial-gradient(circle at center, rgba(0, 255, 138, 0.14), transparent 45%),
+        linear-gradient(145deg, #020403, #06110c 55%, #000000);
+      color: var(--white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      width: min(92vw, 900px);
+      text-align: center;
+      opacity: 1;
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .screen.exit {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+
+    .mode {
+      letter-spacing: 0.35em;
+      font-size: 0.8rem;
+      color: var(--green);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 8vw, 5rem);
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+    }
+
+    .sub {
+      margin-top: 12px;
+      color: rgba(242, 247, 245, 0.68);
+      font-size: 0.95rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    canvas {
+      width: 100%;
+      height: 220px;
+      margin-top: 34px;
+      filter: drop-shadow(0 0 18px rgba(0, 255, 138, 0.5));
+    }
+
+    .start-btn {
+      margin-top: 34px;
+      border: 1px solid rgba(0, 255, 138, 0.7);
+      background: linear-gradient(135deg, rgba(0, 66, 37, 0.95), rgba(0, 183, 255, 0.16));
+      color: var(--white);
+      padding: 16px 34px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      box-shadow: 0 0 28px rgba(0, 255, 138, 0.22);
+    }
+
+    .start-btn.hidden {
+      display: none;
+    }
+
+    .status {
+      margin-top: 14px;
+      font-size: 0.75rem;
+      color: rgba(242, 247, 245, 0.5);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+  </style>
 </head>
+
 <body>
-    <div>
-        <h1>Welcome, Tris!</h1>
-        <div id="waveform"></div>
-    </div>
-    <audio id="welcome-audio" autoplay></audio>
-    <script>
-        const audioFiles = ["greeting1.mp3", "greeting2.mp3", "greeting3.mp3"];
-        const lastIndex = sessionStorage.getItem("lastGreetingIndex");
-        let newIndex;
-        do {
-            newIndex = Math.floor(Math.random() * audioFiles.length);
-        } while (newIndex.toString() === lastIndex);
-        sessionStorage.setItem("lastGreetingIndex", newIndex);
-        document.getElementById("welcome-audio").src = audioFiles[newIndex];
-        setTimeout(function() {
-            window.location.href = "index.html";
-        }, 5000); // 5-second delay
-    </script>
+  <main id="screen" class="screen">
+    <div class="mode">Sport GT+</div>
+    <h1>Welcome, Tris.</h1>
+    <div class="sub">Drive system initialising</div>
+
+    <canvas id="waveform"></canvas>
+
+    <button id="startButton" class="start-btn">Start Drive Mode</button>
+    <div id="status" class="status">Tap to initialise audio</div>
+
+    <audio id="welcomeAudio" preload="auto"></audio>
+  </main>
+
+  <script>
+    const audioFiles = [
+      "greeting1.mp3",
+      "greeting2.mp3",
+      "greeting3.mp3"
+    ];
+
+    const dashboardPage = "index.html"; 
+    const minDisplayTime = 4500;
+
+    const audio = document.getElementById("welcomeAudio");
+    const button = document.getElementById("startButton");
+    const statusText = document.getElementById("status");
+    const screen = document.getElementById("screen");
+    const canvas = document.getElementById("waveform");
+    const ctx = canvas.getContext("2d");
+
+    let audioContext;
+    let analyser;
+    let source;
+    let dataArray;
+    let selectedAudio;
+
+    function chooseAudio() {
+      const last = localStorage.getItem("lastGreetingFile");
+      let choices = audioFiles.filter(file => file !== last);
+
+      if (choices.length === 0) {
+        choices = audioFiles;
+      }
+
+      selectedAudio = choices[Math.floor(Math.random() * choices.length)];
+      localStorage.setItem("lastGreetingFile", selectedAudio);
+      audio.src = selectedAudio;
+    }
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+    }
+
+    function setupAudioVisualiser() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
+
+      source = audioContext.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+    function drawWaveform() {
+      requestAnimationFrame(drawWaveform);
+
+      if (!analyser) {
+        drawIdleWave();
+        return;
+      }
+
+      analyser.getByteTimeDomainData(dataArray);
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const centreY = height / 2;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const gradient = ctx.createLinearGradient(0, 0, width, 0);
+      gradient.addColorStop(0, "rgba(0, 66, 37, 0.2)");
+      gradient.addColorStop(0.5, "rgba(0, 255, 138, 1)");
+      gradient.addColorStop(1, "rgba(0, 183, 255, 0.85)");
+
+      ctx.lineWidth = 3 * window.devicePixelRatio;
+      ctx.strokeStyle = gradient;
+      ctx.beginPath();
+
+      const sliceWidth = width / dataArray.length;
+      let x = 0;
+
+      for (let i = 0; i < dataArray.length; i++) {
+        const value = dataArray[i] / 128.0;
+        const y = value * centreY;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.lineTo(width, centreY);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.28;
+      ctx.lineWidth = 1 * window.devicePixelRatio;
+      ctx.strokeStyle = "rgba(0, 255, 138, 0.45)";
+
+      for (let i = 0; i < 5; i++) {
+        const y = centreY + (i - 2) * 28 * window.devicePixelRatio;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = 1;
+    }
+
+    function drawIdleWave() {
+      const width = canvas.width;
+      const height = canvas.height;
+      const centreY = height / 2;
+      const time = Date.now() * 0.003;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.lineWidth = 2 * window.devicePixelRatio;
+      ctx.strokeStyle = "rgba(0, 255, 138, 0.45)";
+      ctx.beginPath();
+
+      for (let x = 0; x < width; x += 8) {
+        const y = centreY + Math.sin(x * 0.015 + time) * 24 * window.devicePixelRatio;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.stroke();
+    }
+
+    async function startWelcome() {
+      button.classList.add("hidden");
+      statusText.textContent = "Audio initialised";
+
+      try {
+        if (!audioContext) {
+          setupAudioVisualiser();
+        }
+
+        await audioContext.resume();
+        await audio.play();
+
+        const redirectDelay = Math.max(
+          minDisplayTime,
+          isFinite(audio.duration) ? audio.duration * 1000 + 900 : minDisplayTime
+        );
+
+        setTimeout(() => {
+          screen.classList.add("exit");
+
+          setTimeout(() => {
+            window.location.href = dashboardPage;
+          }, 900);
+        }, redirectDelay);
+
+      } catch (error) {
+        statusText.textContent = "Audio blocked — continuing to dashboard";
+
+        setTimeout(() => {
+          window.location.href = dashboardPage;
+        }, 1800);
+      }
+    }
+
+    chooseAudio();
+    resizeCanvas();
+    drawWaveform();
+
+    button.addEventListener("click", startWelcome);
+    window.addEventListener("resize", resizeCanvas);
+  </script>
 </body>
 </html>
