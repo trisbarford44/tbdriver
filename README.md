@@ -1,15 +1,29 @@
-# Tris Drive PWA v4.3 Speed Colour Ring
+# Tris Drive PWA v4.4 Sidebar Config
 
-Adds a dynamic clockwise colour ring around the speedometer.
-
-Colour logic:
-- 0-59 km/h: British racing green
-- 60-109 km/h: dark neon blue
-- 110-159 km/h: amber
-- 160+ km/h: red
+Adds a right-hand slide-out configuration menu.
 
 Replace in GitHub:
-- app.js
+- index.html
 - styles.css
+- app.js
 
-Keep all other files unless you want a full refresh.
+Optional:
+- dashboard.html
+- README.md
+
+Keep:
+- welcome.html
+- greeting1.mp3
+- greeting2.mp3
+- greeting3.mp3
+
+Sidebar options:
+- Theme selector
+- Speed ring range
+- Drive mode label
+- Speed smoothing
+- Compass widget toggle
+- Trip stats toggle
+- Shortcut buttons toggle
+- Reset trip data
+- Restore defaults

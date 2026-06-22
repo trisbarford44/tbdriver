@@ -11,10 +11,13 @@
   <main class="dashboard">
     <header class="topbar">
       <div>
-        <div class="mode">SPORT GT+</div>
+        <div id="modeLabel" class="mode">SPORT GT+</div>
         <div id="gpsStatus" class="status">GPS INITIALISING</div>
       </div>
-      <div id="clock" class="clock">--:--</div>
+      <div class="top-actions">
+        <div id="clock" class="clock">--:--</div>
+        <button id="settingsButton" class="settings-button" aria-label="Open configuration menu" type="button">☰</button>
+      </div>
     </header>
 
     <section class="main-grid">
@@ -26,39 +29,111 @@
           </svg>
           <div class="speed-inner">
             <div id="speed" class="speed">0</div>
-            <div class="unit">KM/H</div>
+            <div id="unitLabel" class="unit">KM/H</div>
           </div>
         </div>
       </section>
 
-      <section class="compass-card stat-card">
+      <section id="compassWidget" class="compass-card stat-card">
         <div id="compass" class="stat-value accent">---</div>
         <div class="stat-label">COMPASS</div>
       </section>
     </section>
 
-    <section class="stats-grid">
-      <div class="stat-card">
+    <section id="statsGrid" class="stats-grid">
+      <div id="maxWidget" class="stat-card">
         <div id="maxSpeed" class="stat-value">0</div>
         <div class="stat-label">MAX SPEED</div>
       </div>
-      <div class="stat-card">
+      <div id="avgWidget" class="stat-card">
         <div id="avgSpeed" class="stat-value">0</div>
         <div class="stat-label">AVG SPEED</div>
       </div>
-      <div class="stat-card">
+      <div id="tripWidget" class="stat-card">
         <div id="tripDistance" class="stat-value">0.00</div>
         <div class="stat-label">TRIP KM</div>
       </div>
     </section>
 
-    <nav class="actions" aria-label="Driving shortcuts">
-      <button onclick="openSpotify()">Spotify</button>
-      <button onclick="openWaze()">Waze</button>
-      <button onclick="openPhone()">Phone</button>
-      <button onclick="openMaps()">Maps</button>
+    <nav id="actionsBar" class="actions" aria-label="Driving shortcuts">
+      <button onclick="openSpotify()" type="button">Spotify</button>
+      <button onclick="openWaze()" type="button">Waze</button>
+      <button onclick="openPhone()" type="button">Phone</button>
+      <button onclick="openMaps()" type="button">Maps</button>
     </nav>
   </main>
+
+  <div id="settingsOverlay" class="settings-overlay" aria-hidden="true"></div>
+
+  <aside id="settingsPanel" class="settings-panel" aria-label="Configuration menu">
+    <div class="settings-head">
+      <div>
+        <div class="settings-kicker">CONFIGURATION</div>
+        <h2>Sport GT+</h2>
+      </div>
+      <button id="closeSettings" class="close-button" type="button" aria-label="Close configuration menu">×</button>
+    </div>
+
+    <div class="settings-group">
+      <label for="themeSelect">Theme</label>
+      <select id="themeSelect">
+        <option value="gt">British Racing GT</option>
+        <option value="blue">Dark Neon Blue</option>
+        <option value="red">Track Red</option>
+        <option value="stealth">Stealth Black</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <label for="maxSpeedSelect">Speed ring range</label>
+      <select id="maxSpeedSelect">
+        <option value="160">160 km/h</option>
+        <option value="200">200 km/h</option>
+        <option value="220">220 km/h</option>
+        <option value="260">260 km/h</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <label for="modeNameInput">Drive mode label</label>
+      <input id="modeNameInput" type="text" maxlength="18" value="SPORT GT+" />
+    </div>
+
+    <div class="settings-toggle">
+      <div>
+        <strong>Speed smoothing</strong>
+        <span>Reduces GPS jumping</span>
+      </div>
+      <input id="smoothToggle" type="checkbox" />
+    </div>
+
+    <div class="settings-toggle">
+      <div>
+        <strong>Compass widget</strong>
+        <span>Show bearing tile</span>
+      </div>
+      <input id="compassToggle" type="checkbox" />
+    </div>
+
+    <div class="settings-toggle">
+      <div>
+        <strong>Trip stats</strong>
+        <span>Max, average and distance</span>
+      </div>
+      <input id="statsToggle" type="checkbox" />
+    </div>
+
+    <div class="settings-toggle">
+      <div>
+        <strong>Shortcut buttons</strong>
+        <span>Spotify, Waze, Phone, Maps</span>
+      </div>
+      <input id="actionsToggle" type="checkbox" />
+    </div>
+
+    <button id="resetTripButton" class="panel-action" type="button">Reset Trip Data</button>
+    <button id="resetSettingsButton" class="panel-action subtle" type="button">Restore Defaults</button>
+  </aside>
 
   <script src="app.js"></script>
 </body>
