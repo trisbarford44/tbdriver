@@ -1,5 +1,23 @@
-# Tris Drive PWA v4 GT
+# Tris Drive PWA v4.1 Responsive
 
-Upload these files to your GitHub Pages repo root. Keep your existing greeting1.mp3, greeting2.mp3 and greeting3.mp3 in the same folder.
+Upload/replace these files in your GitHub `tbdriver` repo:
 
-Open `/welcome.html` first, or rename `welcome.html` to `index.html` and rename the dashboard file to `dashboard.html` if you want the welcome screen to be the default page.
+- `welcome.html`
+- `index.html`
+- `styles.css`
+- `app.js`
+- `manifest.json`
+
+Keep your existing audio files:
+
+- `greeting1.mp3`
+- `greeting2.mp3`
+- `greeting3.mp3`
+
+## What changed
+
+- Dashboard now fits one screen using responsive `100dvh` sizing.
+- iPhone portrait uses compact vertical layout.
+- iPhone landscape uses wide cockpit layout.
+- iPad/desktop uses wider GT layout.
+- Buttons remain ordered: Spotify, Waze, Phone, Maps.
