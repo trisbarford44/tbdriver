@@ -8,7 +8,7 @@ const state = {
   distanceM: 0,
   maxMps: 0,
   units: localStorage.getItem('units') || 'kmh',
-  theme: localStorage.getItem('theme') || 'hybrid',
+  theme: localStorage.getItem('theme') || 'sport',
   wakeLock: null
 };
 
@@ -135,7 +135,7 @@ function openSpotify() {
 function applySettings() {
   el('unitsSelect').value = state.units;
   el('themeSelect').value = state.theme;
-  document.body.className = state.theme === 'hybrid' ? '' : state.theme;
+  document.body.className = state.theme;
   renderTrip();
 }
 

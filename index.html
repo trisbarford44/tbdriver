@@ -3,76 +3,73 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#050608" />
+  <meta name="theme-color" content="#030406" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Tris Drive" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="assets/icon-192.svg" />
   <link rel="stylesheet" href="styles.css" />
-  <title>Tris Drive</title>
+  <title>Tris Drive Sport</title>
 </head>
-<body>
+<body class="sport">
   <main class="app-shell">
-    <header class="cockpit-top">
-      <button id="spotifyTopBtn" class="top-action">Spotify</button>
-      <div class="brand-block">
-        <p class="eyebrow">GT DRIVE MODE</p>
-        <h1>Tris Drive</h1>
+    <header class="top-strip">
+      <button id="spotifyTopBtn" class="pill spotify-pill">Spotify</button>
+      <div class="brand-mark">
+        <span class="mode-label">SPORT+</span>
+        <strong>TRIS DRIVE</strong>
       </div>
-      <div class="status-stack">
+      <div class="status-pills">
         <span id="clock">--:--</span>
         <span id="battery">--%</span>
       </div>
     </header>
 
-    <section class="dashboard">
-      <aside class="side-column left-column">
-        <article class="gauge-card compass-card">
+    <section class="cockpit-grid">
+      <section class="tach-panel">
+        <div class="speed-ring">
+          <div class="ring-glow"></div>
+          <div class="speed-stack">
+            <span id="speed" class="speed">--</span>
+            <span id="unit" class="unit">km/h</span>
+          </div>
+        </div>
+        <div class="gps-row">
+          <span id="gpsStatus">GPS idle</span>
+          <span class="dot">•</span>
+          <span id="accuracy">Accuracy -- m</span>
+        </div>
+        <div class="control-row">
+          <button id="startBtn" class="ignite">START</button>
+          <button id="stopBtn">STOP</button>
+          <button id="resetBtn">RESET</button>
+        </div>
+      </section>
+
+      <aside class="widget-stack left-stack">
+        <article class="metric-card compass-card">
           <p>Heading</p>
-          <div class="mini-compass">
+          <div class="compass-disc">
             <div id="needle" class="needle"></div>
             <span id="direction">--</span>
           </div>
           <strong id="heading">--°</strong>
         </article>
-
-        <article class="gauge-card compact-card">
+        <article class="metric-card">
           <p>Trip</p>
           <strong id="tripDistance">0.00 km</strong>
           <span id="tripTime">00:00:00</span>
         </article>
       </aside>
 
-      <section class="speed-cluster">
-        <div class="arc-shell" aria-hidden="true">
-          <div class="arc arc-left"></div>
-          <div class="arc arc-right"></div>
-        </div>
-        <div class="speed-readout">
-          <span id="speed" class="speed">--</span>
-          <span id="unit" class="unit">km/h</span>
-        </div>
-        <div class="gps-row">
-          <span id="gpsStatus">GPS idle</span>
-          <span>•</span>
-          <span id="accuracy">Accuracy -- m</span>
-        </div>
-        <div class="drive-controls">
-          <button id="startBtn" class="primary">Start</button>
-          <button id="stopBtn">Stop</button>
-          <button id="resetBtn">Reset</button>
-        </div>
-      </section>
-
-      <aside class="side-column right-column">
-        <article class="gauge-card compact-card accent-card">
+      <aside class="widget-stack right-stack">
+        <article class="metric-card redline-card">
           <p>Max Speed</p>
           <strong id="maxSpeed">0 km/h</strong>
           <span>session peak</span>
         </article>
-
-        <article class="gauge-card compact-card">
+        <article class="metric-card">
           <p>Average</p>
           <strong id="avgSpeed">0 km/h</strong>
           <span>moving average</span>
@@ -80,16 +77,16 @@
       </aside>
     </section>
 
-    <section class="quick-actions">
-      <button id="spotifyBtn" class="launcher primary-launcher">Spotify</button>
-      <a class="launcher" href="waze://">Waze</a>
-      <a class="launcher" href="maps://">Maps</a>
-      <a class="launcher" href="tel:">Phone</a>
-      <button id="wakeLockBtn" class="launcher">Screen On</button>
-      <button id="soundBtn" class="launcher">Sound</button>
+    <section class="action-dock">
+      <button id="spotifyBtn" class="dock-btn spotify">Spotify</button>
+      <a class="dock-btn" href="waze://">Waze</a>
+      <a class="dock-btn" href="maps://">Maps</a>
+      <a class="dock-btn" href="tel:">Phone</a>
+      <button id="wakeLockBtn" class="dock-btn">Screen On</button>
+      <button id="soundBtn" class="dock-btn">Sound</button>
     </section>
 
-    <section class="settings-panel">
+    <section class="tuning-panel">
       <label>
         Units
         <select id="unitsSelect">
@@ -98,12 +95,12 @@
         </select>
       </label>
       <label>
-        Display style
+        Theme
         <select id="themeSelect">
-          <option value="hybrid">Hybrid GT</option>
-          <option value="aston">Aston luxury</option>
-          <option value="amg">AMG sport</option>
-          <option value="night">Night stealth</option>
+          <option value="sport">Sport+</option>
+          <option value="track">Track Red</option>
+          <option value="gtblue">GT Blue</option>
+          <option value="stealth">Stealth</option>
         </select>
       </label>
     </section>
