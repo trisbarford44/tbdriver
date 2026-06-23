@@ -1,181 +1,35 @@
-const el = id => document.getElementById(id);
-let maxSpeed = 0, totalSpeed = 0, speedSamples = 0, tripKm = 0, lastPos = null, smoothedSpeed = 0;
-let orientationHeading = null;
-let geoHeading = null;
-
-const defaultConfig = {
-  theme:'gt',
-  maxRingSpeed:220,
-  smoothing:true,
-  compass:true,
-  stats:true,
-  actions:true,
-  modeName:'SPORT GT+',
-  phoneMode:'shortcut'
+const $ = (id) => document.getElementById(id);
+const themes = {
+  aston:{primary:'#00ff8a',secondary:'#004225',accent:'#ffffff',glow:'#00ff8a',background:'#020403',widget:'#07130e'},
+  amg:{primary:'#ff2d2d',secondary:'#2b2b2b',accent:'#ffffff',glow:'#ff2d2d',background:'#030303',widget:'#111111'},
+  porsche:{primary:'#ffffff',secondary:'#9a9a9a',accent:'#e51b23',glow:'#ffffff',background:'#050505',widget:'#151515'},
+  mclaren:{primary:'#ff8a00',secondary:'#00b7ff',accent:'#ffffff',glow:'#ff8a00',background:'#070707',widget:'#15100a'},
+  stealth:{primary:'#d8d8d8',secondary:'#666666',accent:'#ffffff',glow:'#aaaaaa',background:'#000000',widget:'#090909'},
+  custom:null
 };
-
-let config = loadConfig();
-
-function loadConfig(){
-  try { return {...defaultConfig, ...JSON.parse(localStorage.getItem('sportGtConfig') || '{}')}; }
-  catch { return {...defaultConfig}; }
-}
-
-function saveConfig(){ localStorage.setItem('sportGtConfig', JSON.stringify(config)); }
-function updateClock(){ el('clock').textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
-setInterval(updateClock,1000); updateClock();
-
-function displaySpeedValue(kmh){ return Math.max(0, Math.round(kmh)); }
-function kmhFromMps(mps){ return Math.max(0, (mps || 0) * 3.6); }
-function distanceKm(a,b){ const R=6371; const dLat=(b.lat-a.lat)*Math.PI/180; const dLon=(b.lon-a.lon)*Math.PI/180; const lat1=a.lat*Math.PI/180; const lat2=b.lat*Math.PI/180; const x=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)); }
-function speedToColour(speed){ if(speed < 60) return '#00ff8a'; if(speed < 110) return '#00b7ff'; if(speed < 160) return '#ffb000'; return '#ff2d2d'; }
-
-function setSpeedArc(speed){
-  const dash = 603;
-  const max = Number(config.maxRingSpeed) || 220;
-  const pct = Math.min(speed / max, 1);
-  const arc = el('speedArc');
-  const colour = speedToColour(speed);
-  arc.style.strokeDashoffset = dash - (dash * pct * .75);
-  arc.style.stroke = colour;
-  arc.style.filter = `drop-shadow(0 0 14px ${colour}) drop-shadow(0 0 28px ${colour}55)`;
-  document.documentElement.style.setProperty('--speed-colour', colour);
-}
-
-function setGpsStatus(accuracy){
-  let label = 'GPS ACTIVE';
-  if(typeof accuracy === 'number'){
-    if(accuracy <= 12) label = 'GPS STRONG';
-    else if(accuracy <= 35) label = 'GPS FAIR';
-    else label = 'GPS WEAK';
-  }
-  el('gpsStatus').textContent = label;
-}
-
-function updateStats(rawSpeed){
-  const speed = config.smoothing ? (smoothedSpeed = smoothedSpeed * 0.72 + rawSpeed * 0.28) : rawSpeed;
-  const shown = displaySpeedValue(speed);
-  el('speed').textContent=shown;
-  maxSpeed=Math.max(maxSpeed,shown);
-  if(shown>1){ totalSpeed+=shown; speedSamples++; }
-  el('maxSpeed').textContent=Math.round(maxSpeed);
-  el('avgSpeed').textContent=speedSamples?Math.round(totalSpeed/speedSamples):0;
-  el('tripDistance').textContent=tripKm.toFixed(2);
-  setSpeedArc(shown);
-}
-
-function bearingToCompass(deg){
-  if(deg==null || Number.isNaN(deg)) return '---';
-  const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  return dirs[Math.round(deg/22.5)%16];
-}
-
-function updateCompassDisplay(){
-  const heading = orientationHeading ?? geoHeading;
-  el('compass').textContent = bearingToCompass(heading);
-}
-
-function handleOrientation(event){
-  // iOS Safari exposes compass heading as webkitCompassHeading. Android/other browsers usually use alpha.
-  if (typeof event.webkitCompassHeading === 'number') {
-    orientationHeading = event.webkitCompassHeading;
-  } else if (typeof event.alpha === 'number') {
-    orientationHeading = (360 - event.alpha + 360) % 360;
-  }
-  updateCompassDisplay();
-}
-
-async function enableCompass(){
-  try {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      const permission = await DeviceOrientationEvent.requestPermission();
-      if (permission !== 'granted') {
-        el('gpsStatus').textContent = 'COMPASS DENIED';
-        return;
-      }
-    }
-    window.addEventListener('deviceorientation', handleOrientation, true);
-    el('gpsStatus').textContent = 'COMPASS ENABLED';
-  } catch (error) {
-    el('gpsStatus').textContent = 'COMPASS UNAVAILABLE';
-  }
-}
-
-function applyConfig(){
-  document.body.dataset.theme = config.theme;
-  el('modeLabel').textContent = config.modeName || 'SPORT GT+';
-  el('compassWidget').classList.toggle('hidden-widget', !config.compass);
-  el('statsGrid').classList.toggle('hidden-widget', !config.stats);
-  el('actionsBar').classList.toggle('hidden-widget', !config.actions);
-  el('themeSelect').value = config.theme;
-  el('maxSpeedSelect').value = String(config.maxRingSpeed);
-  el('modeNameInput').value = config.modeName;
-  const phoneModeSelect = el('phoneModeSelect');
-  if(phoneModeSelect) phoneModeSelect.value = config.phoneMode || 'shortcut';
-  el('smoothToggle').checked = !!config.smoothing;
-  el('compassToggle').checked = !!config.compass;
-  el('statsToggle').checked = !!config.stats;
-  el('actionsToggle').checked = !!config.actions;
-  setSpeedArc(Number(el('speed').textContent) || 0);
-}
-
-function bindSettings(){
-  const panel=el('settingsPanel'), overlay=el('settingsOverlay');
-  const open=()=>{ panel.classList.add('open'); overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); };
-  const close=()=>{ panel.classList.remove('open'); overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); };
-  el('settingsButton').addEventListener('click',open);
-  el('closeSettings').addEventListener('click',close);
-  overlay.addEventListener('click',close);
-  el('themeSelect').addEventListener('change',e=>{ config.theme=e.target.value; saveConfig(); applyConfig(); });
-  el('maxSpeedSelect').addEventListener('change',e=>{ config.maxRingSpeed=Number(e.target.value); saveConfig(); applyConfig(); });
-  el('modeNameInput').addEventListener('input',e=>{ config.modeName=e.target.value || 'SPORT GT+'; saveConfig(); applyConfig(); });
-  const phoneModeSelect = el('phoneModeSelect');
-  if(phoneModeSelect) phoneModeSelect.addEventListener('change',e=>{ config.phoneMode=e.target.value; saveConfig(); applyConfig(); });
-  el('smoothToggle').addEventListener('change',e=>{ config.smoothing=e.target.checked; saveConfig(); applyConfig(); });
-  el('compassToggle').addEventListener('change',e=>{ config.compass=e.target.checked; saveConfig(); applyConfig(); });
-  el('statsToggle').addEventListener('change',e=>{ config.stats=e.target.checked; saveConfig(); applyConfig(); });
-  el('actionsToggle').addEventListener('change',e=>{ config.actions=e.target.checked; saveConfig(); applyConfig(); });
-  const compassButton = el('enableCompassButton');
-  if(compassButton) compassButton.addEventListener('click', enableCompass);
-  el('resetTripButton').addEventListener('click',()=>{ maxSpeed=0; totalSpeed=0; speedSamples=0; tripKm=0; lastPos=null; smoothedSpeed=0; updateStats(0); });
-  el('resetSettingsButton').addEventListener('click',()=>{ config={...defaultConfig}; saveConfig(); applyConfig(); });
-}
-
-applyConfig();
-bindSettings();
-
-if('geolocation' in navigator){
-  navigator.geolocation.watchPosition(pos=>{
-    setGpsStatus(pos.coords.accuracy);
-    const raw=kmhFromMps(pos.coords.speed);
-    updateStats(raw);
-
-    if(typeof pos.coords.heading === 'number' && !Number.isNaN(pos.coords.heading)) {
-      geoHeading = pos.coords.heading;
-      updateCompassDisplay();
-    }
-
-    const current={lat:pos.coords.latitude, lon:pos.coords.longitude};
-    if(lastPos){ const d=distanceKm(lastPos,current); if(d<1) tripKm += d; }
-    lastPos=current;
-  },()=>{ el('gpsStatus').textContent='GPS UNAVAILABLE'; },{enableHighAccuracy:true, maximumAge:1000, timeout:10000});
-} else {
-  el('gpsStatus').textContent='GPS NOT SUPPORTED';
-}
-
-// Non-iOS browsers may allow orientation without a permission prompt.
-if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') {
-  window.addEventListener('deviceorientation', handleOrientation, true);
-}
-
-function openSpotify(){ location.href='spotify://'; setTimeout(()=>{ location.href='https://open.spotify.com'; },700); }
-function openWaze(){ location.href='waze://'; setTimeout(()=>{ location.href='https://waze.com/ul'; },700); }
-function openPhone(){
-  if((config.phoneMode || 'shortcut') === 'shortcut'){
-    location.href = 'shortcuts://run-shortcut?name=Drive%20Call';
-  } else {
-    location.href = 'telprompt://';
-    setTimeout(()=>{ location.href='tel:'; },700);
-  }
-}
-function openMaps(){ location.href='maps://'; setTimeout(()=>{ location.href='https://maps.apple.com'; },700); }
+const defaultSettings = {name:'Tris', driveMode:'SPORT GT+', theme:'aston', ...themes.aston, units:'kmh', ringMax:220, smooth:true, compassStyle:'text', launchers:[['Spotify','spotify://|https://open.spotify.com'],['Waze','waze://|https://waze.com/ul'],['Phone','tel:'],['Maps','maps://|https://maps.apple.com']]};
+let settings = loadSettings();
+let state = {speedKmh:0, smoothKmh:0, maxKmh:0, samples:0, speedSum:0, tripKm:0, lastPos:null, heading:null, lastTick:Date.now()};
+function loadSettings(){try{return {...defaultSettings,...JSON.parse(localStorage.getItem('drivedeck_settings')||'{}')}}catch{return {...defaultSettings}}}
+function saveSettings(){localStorage.setItem('drivedeck_settings',JSON.stringify(settings));localStorage.setItem('drivedeck_profile_name',settings.name)}
+function applyTheme(){['primary','secondary','accent','glow','background','widget'].forEach(k=>document.documentElement.style.setProperty(`--${k==='background'?'bg':k}`,settings[k])); $('driveMode').textContent=settings.driveMode; $('profileName').textContent=`${settings.name} / DriveDeck`; $('speedUnit').textContent=settings.units==='mph'?'MPH':'KM/H';}
+function speedDisplay(kmh){return settings.units==='mph'?kmh*0.621371:kmh} function distDisplay(km){return settings.units==='mph'?km*0.621371:km}
+function updateClock(){ $('clock').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+function colourForSpeed(kmh){ if(kmh>=160)return '#ff3030'; if(kmh>=110)return '#ffb000'; if(kmh>=60)return settings.secondary; return settings.primary; }
+function renderSpeed(){ const kmh=settings.smooth?state.smoothKmh:state.speedKmh; const val=Math.max(0,Math.round(speedDisplay(kmh))); $('speedValue').textContent=val; const ringMax=settings.units==='mph'?settings.ringMax*1.60934:settings.ringMax; const deg=Math.min(360,(kmh/ringMax)*360); const c=colourForSpeed(kmh); document.documentElement.style.setProperty('--ring-deg',`${deg}deg`); document.documentElement.style.setProperty('--ring-color',c); document.documentElement.style.setProperty('--speed-glow',`0 0 ${Math.min(42,16+kmh/5)}px ${c}66`); $('maxSpeed').textContent=Math.round(speedDisplay(state.maxKmh)); $('avgSpeed').textContent=state.samples?Math.round(speedDisplay(state.speedSum/state.samples)):0; $('tripDistance').textContent=distDisplay(state.tripKm).toFixed(1); }
+function bearingLabel(deg){ if(deg==null)return '--'; const dirs=['N','NE','E','SE','S','SW','W','NW']; return dirs[Math.round(deg/45)%8]; }
+function renderCompass(){ const el=$('compassRender'); const deg=state.heading; const label=bearingLabel(deg); el.className=`compass-render ${settings.compassStyle}-compass`; if(settings.compassStyle==='text') el.textContent=label; else if(settings.compassStyle==='modern') el.innerHTML=`<strong>${label}</strong> · ${deg==null?'--':Math.round(deg)+'°'}`; else if(settings.compassStyle==='futuristic') el.textContent=`${label} ${deg==null?'--':Math.round(deg)+'°'}`; else if(settings.compassStyle==='traditional'){el.textContent=label; el.style.setProperty('--heading-rotation',`${deg||0}deg`)} else el.textContent=`W  NW  N  NE  E  / ${label}`; }
+function distanceKm(a,b){ const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180,lat1=a.lat*Math.PI/180,lat2=b.lat*Math.PI/180; const x=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2; return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)); }
+function handlePosition(pos){ const {latitude,longitude,speed,accuracy}=pos.coords; const kmh=speed!=null&&speed>=0?speed*3.6:0; state.speedKmh=kmh; state.smoothKmh=state.smoothKmh?state.smoothKmh*0.78+kmh*0.22:kmh; state.maxKmh=Math.max(state.maxKmh,kmh); state.samples++; state.speedSum+=kmh; if(state.lastPos){ const d=distanceKm(state.lastPos,{lat:latitude,lon:longitude}); if(d<1) state.tripKm+=d; } state.lastPos={lat:latitude,lon:longitude}; $('gpsStatus').textContent=accuracy<20?'GPS strong':accuracy<60?'GPS fair':'GPS weak'; renderSpeed(); }
+function startGps(){ if(!navigator.geolocation){$('gpsStatus').textContent='GPS unavailable';return;} navigator.geolocation.watchPosition(handlePosition,()=>{$('gpsStatus').textContent='GPS permission needed'}, {enableHighAccuracy:true,maximumAge:1000,timeout:10000}); }
+async function enableCompass(){ try{ if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){ const res=await DeviceOrientationEvent.requestPermission(); if(res!=='granted') return; } window.addEventListener('deviceorientationabsolute', compassHandler, true); window.addEventListener('deviceorientation', compassHandler, true); localStorage.setItem('drivedeck_compass_requested','true'); }catch(e){} }
+function compassHandler(e){ let h=e.webkitCompassHeading ?? (e.alpha!=null?360-e.alpha:null); if(h!=null){state.heading=(h+360)%360; renderCompass();} }
+function renderLaunchers(){ const grid=$('launcherGrid'); grid.innerHTML=''; settings.launchers.forEach(([label,url])=>{ const b=document.createElement('button'); b.className='launch-button'; b.textContent=label; b.onclick=()=>openDeepLink(url); grid.appendChild(b); }); }
+function openDeepLink(url){ const parts=url.split('|'); location.href=parts[0]; if(parts[1]) setTimeout(()=>{location.href=parts[1]},700); }
+function openPanel(){ $('settingsPanel').classList.add('open'); $('panelScrim').classList.add('open'); } function closePanel(){ $('settingsPanel').classList.remove('open'); $('panelScrim').classList.remove('open'); }
+function bindSettings(){ $('userNameInput').value=settings.name; $('driveModeInput').value=settings.driveMode; $('themePreset').value=settings.theme; $('unitSelect').value=settings.units; $('ringMaxInput').value=settings.ringMax; $('smoothSpeedToggle').checked=settings.smooth; $('compassStyle').value=settings.compassStyle; ['primary','secondary','accent','glow','background','widget'].forEach(k=>$(k+'Color').value=settings[k]); $('settingsToggle').onclick=openPanel; $('settingsClose').onclick=closePanel; $('panelScrim').onclick=closePanel; $('enableCompass').onclick=enableCompass; $('userNameInput').oninput=e=>{settings.name=e.target.value||'Driver'; saveSettings(); applyTheme();}; $('driveModeInput').oninput=e=>{settings.driveMode=e.target.value||'SPORT GT+'; saveSettings(); applyTheme();}; $('themePreset').onchange=e=>{settings.theme=e.target.value; if(themes[settings.theme]) Object.assign(settings,themes[settings.theme]); syncInputs(); saveSettings(); applyTheme();}; $('unitSelect').onchange=e=>{settings.units=e.target.value; saveSettings(); applyTheme(); renderSpeed();}; $('ringMaxInput').oninput=e=>{settings.ringMax=Number(e.target.value)||220; saveSettings(); renderSpeed();}; $('smoothSpeedToggle').onchange=e=>{settings.smooth=e.target.checked; saveSettings();}; $('compassStyle').onchange=e=>{settings.compassStyle=e.target.value; saveSettings(); renderCompass();}; ['primary','secondary','accent','glow','background','widget'].forEach(k=>$(k+'Color').oninput=e=>{settings[k]=e.target.value; settings.theme='custom'; $('themePreset').value='custom'; saveSettings(); applyTheme();}); $('resetTrip').onclick=()=>{state={...state,speedKmh:0,smoothKmh:0,maxKmh:0,samples:0,speedSum:0,tripKm:0,lastPos:null};renderSpeed();}; $('restoreDefaults').onclick=()=>{settings={...defaultSettings};saveSettings();location.reload();}; $('saveDrive').onclick=saveDriveHistory; $('clearHistory').onclick=()=>{localStorage.removeItem('drivedeck_history');renderHistory();}; renderLauncherEditor(); }
+function syncInputs(){ ['primary','secondary','accent','glow','background','widget'].forEach(k=>$(k+'Color').value=settings[k]); }
+function renderLauncherEditor(){ const wrap=$('launcherEditor'); wrap.innerHTML=''; settings.launchers.forEach((item,i)=>{ const row=document.createElement('div'); row.className='launcher-row'; row.innerHTML=`<input value="${item[0]}" data-i="${i}" data-k="0"><input value="${item[1]}" data-i="${i}" data-k="1">`; wrap.appendChild(row); }); wrap.querySelectorAll('input').forEach(inp=>inp.oninput=e=>{settings.launchers[e.target.dataset.i][e.target.dataset.k]=e.target.value; saveSettings(); renderLaunchers();}); }
+function saveDriveHistory(){ const h=JSON.parse(localStorage.getItem('drivedeck_history')||'[]'); h.unshift({date:new Date().toLocaleString(),max:Math.round(speedDisplay(state.maxKmh)),avg:state.samples?Math.round(speedDisplay(state.speedSum/state.samples)):0,trip:distDisplay(state.tripKm).toFixed(1),unit:settings.units==='mph'?'MPH':'KM/H'}); localStorage.setItem('drivedeck_history',JSON.stringify(h.slice(0,20))); renderHistory(); }
+function renderHistory(){ const h=JSON.parse(localStorage.getItem('drivedeck_history')||'[]'); $('historyList').innerHTML=h.length?h.map(d=>`<div>${d.date}<br>Max ${d.max} ${d.unit} · Avg ${d.avg} · Trip ${d.trip}</div>`).join('<hr>'):'No previous drives yet.'; }
+applyTheme(); bindSettings(); renderLaunchers(); renderCompass(); renderHistory(); updateClock(); setInterval(updateClock,1000); startGps(); if(localStorage.getItem('drivedeck_compass_requested')==='true') enableCompass();

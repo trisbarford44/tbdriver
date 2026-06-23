@@ -1,41 +1,30 @@
-# Tris Drive PWA v4.6 — Compass + Phone Fix
+# DriveDeck v5.0 Core
 
-Replace these files in GitHub:
+Upload/replace these files in your GitHub Pages repo:
 
 - `index.html`
+- `welcome.html`
+- `styles.css`
 - `app.js`
+- `manifest.json`
 
-Keep your existing audio files and `welcome.html` unless you want to replace all files.
+Keep your existing audio files:
 
-## Compass
+- `greeting1.mp3`
+- `greeting2.mp3`
+- `greeting3.mp3`
 
-The compass now uses two sources:
+## New in v5.0
 
-1. iPhone motion/orientation heading when enabled.
-2. GPS heading while moving.
+- Full theme engine with presets and colour editor
+- Speedometer ring and speed number linked to theme/speed state
+- KM/H and MPH toggle
+- User profile name and drive mode label
+- Compass style selector
+- Drive history save/clear
+- Configurable app launcher slots
+- Persistent settings via localStorage
 
-On iPhone, tap the settings/sidebar button, then tap **Enable iPhone Compass**. iOS requires a user tap before it gives web apps compass access.
+Test URL:
 
-If the car is stationary and the iPhone compass has not been enabled, the compass may show `---` because GPS heading only works reliably while moving.
-
-## Phone button
-
-Web apps cannot open iPhone Recents directly. Apple does not expose Recent Calls to Safari/PWAs.
-
-This version adds a setting:
-
-- **Siri Shortcut: Drive Call** — opens an iOS Shortcut named `Drive Call`.
-- **Open dialer** — opens the phone dialer prompt.
-
-Recommended iOS Shortcut:
-
-1. Open Shortcuts.
-2. Create a shortcut named exactly `Drive Call`.
-3. Add action: **Ask for Input**.
-   - Prompt: `Who do you want to call?`
-   - Input type: Text.
-4. Add action: **Call**.
-   - Set contact/number to the provided input.
-5. Save.
-
-Then the app's Phone button can launch that shortcut.
+`https://trisbarford44.github.io/tbdriver/welcome.html`

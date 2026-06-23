@@ -3,40 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sport GT+ Welcome</title>
+  <title>DriveDeck Welcome</title>
   <style>
-    :root { --black:#020403; --green:#00ff8a; --brg:#004225; --blue:#00b7ff; --white:#f2f7f5; }
-    *{box-sizing:border-box} body{margin:0;height:100vh;background:radial-gradient(circle at center,rgba(0,255,138,.14),transparent 45%),linear-gradient(145deg,#020403,#06110c 55%,#000);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden;display:flex;align-items:center;justify-content:center}.screen{width:min(92vw,900px);text-align:center;opacity:1;transition:opacity 1s ease,transform 1s ease}.screen.exit{opacity:0;transform:scale(1.04)}.mode{letter-spacing:.35em;font-size:.8rem;color:var(--green);text-transform:uppercase;margin-bottom:18px}.boot{font-size:.72rem;letter-spacing:.25em;color:rgba(0,183,255,.85);text-transform:uppercase;margin-bottom:12px}h1{font-size:clamp(2.2rem,8vw,5rem);margin:0;font-weight:600;letter-spacing:-.04em}.sub{margin-top:12px;color:rgba(242,247,245,.68);font-size:.95rem;letter-spacing:.15em;text-transform:uppercase}canvas{width:100%;height:220px;margin-top:34px;filter:drop-shadow(0 0 18px rgba(0,255,138,.5))}.start-btn{margin-top:34px;border:1px solid rgba(0,255,138,.7);background:linear-gradient(135deg,rgba(0,66,37,.95),rgba(0,183,255,.16));color:var(--white);padding:16px 34px;border-radius:999px;font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;box-shadow:0 0 28px rgba(0,255,138,.22)}.start-btn.hidden{display:none}.status{margin-top:14px;font-size:.75rem;color:rgba(242,247,245,.5);letter-spacing:.14em;text-transform:uppercase}.particles{position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(0,255,138,.26) 1px,transparent 1px),radial-gradient(circle,rgba(0,183,255,.16) 1px,transparent 1px);background-size:80px 80px,120px 120px;animation:drift 16s linear infinite}@keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-80px,-120px,0)}}
+    :root { --green:#00ff8a; --blue:#00b7ff; --black:#020403; }
+    * { box-sizing:border-box; }
+    body { margin:0; height:100vh; overflow:hidden; background:radial-gradient(circle at center, rgba(0,255,138,.12), transparent 45%), linear-gradient(145deg,#020403,#06110c 55%,#000); color:#f4fff9; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; display:flex; align-items:center; justify-content:center; }
+    .screen { width:min(92vw,900px); text-align:center; transition:opacity .9s ease, transform .9s ease; }
+    .screen.exit { opacity:0; transform:scale(1.04); }
+    .mode { letter-spacing:.35em; font-size:.8rem; color:var(--green); text-transform:uppercase; margin-bottom:18px; }
+    h1 { font-size:clamp(2.2rem,8vw,5rem); margin:0; font-weight:600; letter-spacing:-.04em; }
+    .sub { margin-top:12px; color:rgba(244,255,249,.68); font-size:.9rem; letter-spacing:.15em; text-transform:uppercase; }
+    canvas { width:100%; height:220px; margin-top:34px; filter:drop-shadow(0 0 18px rgba(0,255,138,.5)); }
+    button { margin-top:34px; border:1px solid rgba(0,255,138,.7); background:linear-gradient(135deg,rgba(0,66,37,.95),rgba(0,183,255,.16)); color:white; padding:16px 34px; border-radius:999px; font-size:.85rem; letter-spacing:.22em; text-transform:uppercase; box-shadow:0 0 28px rgba(0,255,138,.22); }
+    button.hidden { display:none; }
+    .status { margin-top:14px; font-size:.75rem; color:rgba(244,255,249,.5); letter-spacing:.14em; text-transform:uppercase; }
   </style>
 </head>
 <body>
-  <div class="particles"></div>
   <main id="screen" class="screen">
-    <div class="mode">Sport GT+</div>
-    <div id="boot" class="boot">Initialising drive system</div>
-    <h1 id="headline">Welcome, Tris.</h1>
-    <div id="subline" class="sub">Audio interface standing by</div>
+    <div class="mode">DriveDeck</div>
+    <h1 id="welcomeTitle">Welcome.</h1>
+    <div class="sub">Drive system initialising</div>
     <canvas id="waveform"></canvas>
-    <button id="startButton" class="start-btn">Start Drive Mode</button>
+    <button id="startButton">Start Drive Mode</button>
     <div id="status" class="status">Tap to initialise audio</div>
     <audio id="welcomeAudio" preload="auto"></audio>
   </main>
-<script>
-const greetings=[
-  {file:"greeting1.mp3",headline:"Welcome, Tris.",sub:"The road ahead is yours."},
-  {file:"greeting2.mp3",headline:"Good evening, Tris.",sub:"Sport GT+ is ready."},
-  {file:"greeting3.mp3",headline:"Keep it frosty, Tris.",sub:"Drive mode engaged."}
-];
-const dashboardPage="index.html"; const minDisplayTime=4500;
-const audio=document.getElementById("welcomeAudio"),button=document.getElementById("startButton"),statusText=document.getElementById("status"),screen=document.getElementById("screen"),canvas=document.getElementById("waveform"),ctx=canvas.getContext("2d"),headline=document.getElementById("headline"),subline=document.getElementById("subline"),boot=document.getElementById("boot");
-let audioContext,analyser,source,dataArray,selected;
-function chooseGreeting(){const last=localStorage.getItem("lastGreetingFile");let choices=greetings.filter(g=>g.file!==last);if(!choices.length)choices=greetings;selected=choices[Math.floor(Math.random()*choices.length)];localStorage.setItem("lastGreetingFile",selected.file);audio.src=selected.file;headline.textContent=selected.headline;subline.textContent=selected.sub;}
-function resizeCanvas(){canvas.width=canvas.offsetWidth*window.devicePixelRatio;canvas.height=canvas.offsetHeight*window.devicePixelRatio;}
-function setupAudioVisualiser(){audioContext=new(window.AudioContext||window.webkitAudioContext)();analyser=audioContext.createAnalyser();analyser.fftSize=2048;source=audioContext.createMediaElementSource(audio);source.connect(analyser);analyser.connect(audioContext.destination);dataArray=new Uint8Array(analyser.frequencyBinCount);}
-function drawWaveform(){requestAnimationFrame(drawWaveform);if(!analyser){drawIdleWave();return;}analyser.getByteTimeDomainData(dataArray);const w=canvas.width,h=canvas.height,c=h/2;ctx.clearRect(0,0,w,h);const gradient=ctx.createLinearGradient(0,0,w,0);gradient.addColorStop(0,"rgba(0,66,37,.18)");gradient.addColorStop(.5,"rgba(0,255,138,1)");gradient.addColorStop(1,"rgba(0,183,255,.86)");ctx.lineWidth=3*window.devicePixelRatio;ctx.strokeStyle=gradient;ctx.beginPath();const slice=w/dataArray.length;let x=0;for(let i=0;i<dataArray.length;i++){const v=dataArray[i]/128,y=v*c;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);x+=slice;}ctx.lineTo(w,c);ctx.stroke();ctx.globalAlpha=.22;ctx.lineWidth=1*window.devicePixelRatio;ctx.strokeStyle="rgba(0,255,138,.45)";for(let i=0;i<5;i++){const y=c+(i-2)*28*window.devicePixelRatio;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}ctx.globalAlpha=1;}
-function drawIdleWave(){const w=canvas.width,h=canvas.height,c=h/2,t=Date.now()*.003;ctx.clearRect(0,0,w,h);ctx.lineWidth=2*window.devicePixelRatio;ctx.strokeStyle="rgba(0,255,138,.45)";ctx.beginPath();for(let x=0;x<w;x+=8){const y=c+Math.sin(x*.015+t)*24*window.devicePixelRatio;if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
-async function startWelcome(){button.classList.add("hidden");boot.textContent="Sport GT+ online";statusText.textContent="Audio initialised";try{if(!audioContext)setupAudioVisualiser();await audioContext.resume();await audio.play();localStorage.setItem("audioUnlocked","true");const redirectDelay=Math.max(minDisplayTime,isFinite(audio.duration)?audio.duration*1000+900:minDisplayTime);setTimeout(()=>{screen.classList.add("exit");setTimeout(()=>{window.location.href=dashboardPage;},900);},redirectDelay);}catch(e){statusText.textContent="Audio blocked — continuing to dashboard";setTimeout(()=>{window.location.href=dashboardPage;},1800);}}
-chooseGreeting();resizeCanvas();drawWaveform();button.addEventListener("click",startWelcome);window.addEventListener("resize",resizeCanvas);
-</script>
+  <script>
+    const audioFiles = ["greeting1.mp3","greeting2.mp3","greeting3.mp3"];
+    const dashboardPage = "index.html";
+    const audio = document.getElementById("welcomeAudio"), button = document.getElementById("startButton"), statusText = document.getElementById("status"), screen = document.getElementById("screen"), canvas = document.getElementById("waveform"), ctx = canvas.getContext("2d"), title = document.getElementById("welcomeTitle");
+    let audioContext, analyser, source, dataArray;
+    const savedName = localStorage.getItem("drivedeck_profile_name") || "Tris";
+    const lines = [`Welcome, ${savedName}.`,`Good evening, ${savedName}.`,`DriveDeck is ready, ${savedName}.`];
+    title.textContent = lines[Math.floor(Math.random()*lines.length)];
+    function chooseAudio(){ const last=localStorage.getItem("lastGreetingFile"); let choices=audioFiles.filter(f=>f!==last); if(!choices.length) choices=audioFiles; const selected=choices[Math.floor(Math.random()*choices.length)]; localStorage.setItem("lastGreetingFile",selected); audio.src=selected; }
+    function resizeCanvas(){ canvas.width=canvas.offsetWidth*devicePixelRatio; canvas.height=canvas.offsetHeight*devicePixelRatio; }
+    function setupAudio(){ audioContext=new (window.AudioContext||window.webkitAudioContext)(); analyser=audioContext.createAnalyser(); analyser.fftSize=2048; source=audioContext.createMediaElementSource(audio); source.connect(analyser); analyser.connect(audioContext.destination); dataArray=new Uint8Array(analyser.frequencyBinCount); }
+    function draw(){ requestAnimationFrame(draw); const w=canvas.width,h=canvas.height,c=h/2; ctx.clearRect(0,0,w,h); const grad=ctx.createLinearGradient(0,0,w,0); grad.addColorStop(0,"rgba(0,66,37,.2)"); grad.addColorStop(.5,"rgba(0,255,138,1)"); grad.addColorStop(1,"rgba(0,183,255,.9)"); ctx.lineWidth=3*devicePixelRatio; ctx.strokeStyle=grad; ctx.beginPath(); if(analyser){ analyser.getByteTimeDomainData(dataArray); const sw=w/dataArray.length; let x=0; dataArray.forEach((v,i)=>{ const y=(v/128)*c; if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); x+=sw; }); } else { const t=Date.now()*.003; for(let x=0;x<w;x+=8){ const y=c+Math.sin(x*.015+t)*24*devicePixelRatio; if(x===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); } } ctx.stroke(); }
+    async function start(){ button.classList.add("hidden"); statusText.textContent="Audio initialised"; try{ if(!audioContext) setupAudio(); await audioContext.resume(); await audio.play(); const delay=Math.max(4300, isFinite(audio.duration)?audio.duration*1000+800:4300); setTimeout(()=>{screen.classList.add("exit"); setTimeout(()=>location.href=dashboardPage,900);},delay); } catch(e){ statusText.textContent="Audio blocked — continuing"; setTimeout(()=>location.href=dashboardPage,1500); } }
+    chooseAudio(); resizeCanvas(); draw(); button.addEventListener("click",start); addEventListener("resize",resizeCanvas);
+  </script>
 </body>
 </html>

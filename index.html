@@ -3,147 +3,146 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Sport GT+ Dashboard</title>
+  <title>DriveDeck v5</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="dashboard">
+  <div class="app-shell">
     <header class="topbar">
       <div>
-        <div id="modeLabel" class="mode">SPORT GT+</div>
-        <div id="gpsStatus" class="status">GPS INITIALISING</div>
+        <div id="driveMode" class="mode">SPORT GT+</div>
+        <div id="profileName" class="profile-name">DriveDeck</div>
       </div>
-      <div class="top-actions">
-        <div id="clock" class="clock">--:--</div>
-        <button id="settingsButton" class="settings-button" aria-label="Open configuration menu" type="button">☰</button>
-      </div>
+      <div id="clock" class="clock">--:--</div>
+      <button id="settingsToggle" class="icon-button" aria-label="Open settings">☰</button>
     </header>
 
-    <section class="main-grid">
+    <main class="dashboard">
       <section class="speed-card">
-        <div class="speed-ring">
-          <svg viewBox="0 0 240 240" class="ring-svg" aria-hidden="true">
-            <circle class="ring-bg" cx="120" cy="120" r="96"></circle>
-            <circle id="speedArc" class="ring-arc" cx="120" cy="120" r="96"></circle>
-          </svg>
+        <div class="speed-ring" id="speedRing">
           <div class="speed-inner">
-            <div id="speed" class="speed">0</div>
-            <div id="unitLabel" class="unit">KM/H</div>
+            <div id="speedValue" class="speed-value">0</div>
+            <div id="speedUnit" class="speed-unit">KM/H</div>
           </div>
+        </div>
+        <div id="gpsStatus" class="gps-status">GPS waiting</div>
+      </section>
+
+      <section class="widget-zone">
+        <div id="compassWidget" class="widget compass-widget">
+          <div class="widget-label">Compass</div>
+          <div id="compassRender" class="compass-render text-compass">--</div>
+        </div>
+        <div class="widget">
+          <div class="widget-label">Max</div>
+          <div id="maxSpeed" class="widget-value">0</div>
+        </div>
+        <div class="widget">
+          <div class="widget-label">Average</div>
+          <div id="avgSpeed" class="widget-value">0</div>
+        </div>
+        <div class="widget">
+          <div class="widget-label">Trip</div>
+          <div id="tripDistance" class="widget-value">0.0</div>
         </div>
       </section>
 
-      <section id="compassWidget" class="compass-card stat-card">
-        <div id="compass" class="stat-value accent">---</div>
-        <div class="stat-label">COMPASS</div>
-      </section>
-    </section>
+      <section id="launcherGrid" class="launcher-grid"></section>
+    </main>
 
-    <section id="statsGrid" class="stats-grid">
-      <div id="maxWidget" class="stat-card">
-        <div id="maxSpeed" class="stat-value">0</div>
-        <div class="stat-label">MAX SPEED</div>
+    <aside id="settingsPanel" class="settings-panel" aria-hidden="true">
+      <div class="settings-head">
+        <div>
+          <div class="panel-title">DriveDeck Settings</div>
+          <div class="panel-subtitle">v5.0 product foundation</div>
+        </div>
+        <button id="settingsClose" class="icon-button">×</button>
       </div>
-      <div id="avgWidget" class="stat-card">
-        <div id="avgSpeed" class="stat-value">0</div>
-        <div class="stat-label">AVG SPEED</div>
+
+      <div class="settings-scroll">
+        <section class="settings-section">
+          <h3>Profile</h3>
+          <label>Name
+            <input id="userNameInput" type="text" placeholder="Tris" />
+          </label>
+          <label>Drive mode label
+            <input id="driveModeInput" type="text" placeholder="SPORT GT+" />
+          </label>
+        </section>
+
+        <section class="settings-section">
+          <h3>Theme Presets</h3>
+          <select id="themePreset">
+            <option value="aston">Aston GT</option>
+            <option value="amg">AMG Black Series</option>
+            <option value="porsche">Porsche Sport</option>
+            <option value="mclaren">McLaren Tech</option>
+            <option value="stealth">Stealth</option>
+            <option value="custom">Custom</option>
+          </select>
+        </section>
+
+        <section class="settings-section colour-grid">
+          <h3>Colour Engine</h3>
+          <label>Primary <input id="primaryColor" type="color" /></label>
+          <label>Secondary <input id="secondaryColor" type="color" /></label>
+          <label>Accent <input id="accentColor" type="color" /></label>
+          <label>Glow <input id="glowColor" type="color" /></label>
+          <label>Background <input id="backgroundColor" type="color" /></label>
+          <label>Widget <input id="widgetColor" type="color" /></label>
+        </section>
+
+        <section class="settings-section">
+          <h3>Speed</h3>
+          <label>Units
+            <select id="unitSelect">
+              <option value="kmh">KM/H</option>
+              <option value="mph">MPH</option>
+            </select>
+          </label>
+          <label>Ring max speed
+            <input id="ringMaxInput" type="number" min="60" max="320" step="10" />
+          </label>
+          <label class="switch-row"><input id="smoothSpeedToggle" type="checkbox" /> Smooth GPS speed</label>
+        </section>
+
+        <section class="settings-section">
+          <h3>Compass</h3>
+          <button id="enableCompass" class="panel-button">Enable iPhone Compass</button>
+          <label>Compass style
+            <select id="compassStyle">
+              <option value="text">Text based</option>
+              <option value="modern">Modern digital</option>
+              <option value="futuristic">Futuristic radar</option>
+              <option value="traditional">Traditional circle</option>
+              <option value="strip">Bearing strip</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="settings-section">
+          <h3>Launcher Slots</h3>
+          <div id="launcherEditor"></div>
+        </section>
+
+        <section class="settings-section">
+          <h3>Drive History</h3>
+          <div id="historyList" class="history-list">No previous drives yet.</div>
+          <button id="saveDrive" class="panel-button">Save Current Drive</button>
+          <button id="clearHistory" class="panel-button danger">Clear History</button>
+        </section>
+
+        <section class="settings-section">
+          <h3>System</h3>
+          <button id="resetTrip" class="panel-button">Reset Current Trip</button>
+          <button id="restoreDefaults" class="panel-button danger">Restore Defaults</button>
+        </section>
       </div>
-      <div id="tripWidget" class="stat-card">
-        <div id="tripDistance" class="stat-value">0.00</div>
-        <div class="stat-label">TRIP KM</div>
-      </div>
-    </section>
+    </aside>
 
-    <nav id="actionsBar" class="actions" aria-label="Driving shortcuts">
-      <button onclick="openSpotify()" type="button">Spotify</button>
-      <button onclick="openWaze()" type="button">Waze</button>
-      <button onclick="openPhone()" type="button">Phone</button>
-      <button onclick="openMaps()" type="button">Maps</button>
-    </nav>
-  </main>
-
-  <div id="settingsOverlay" class="settings-overlay" aria-hidden="true"></div>
-
-  <aside id="settingsPanel" class="settings-panel" aria-label="Configuration menu">
-    <div class="settings-head">
-      <div>
-        <div class="settings-kicker">CONFIGURATION</div>
-        <h2>Sport GT+</h2>
-      </div>
-      <button id="closeSettings" class="close-button" type="button" aria-label="Close configuration menu">×</button>
-    </div>
-
-    <div class="settings-group">
-      <label for="themeSelect">Theme</label>
-      <select id="themeSelect">
-        <option value="gt">British Racing GT</option>
-        <option value="blue">Dark Neon Blue</option>
-        <option value="red">Track Red</option>
-        <option value="stealth">Stealth Black</option>
-      </select>
-    </div>
-
-    <div class="settings-group">
-      <label for="maxSpeedSelect">Speed ring range</label>
-      <select id="maxSpeedSelect">
-        <option value="160">160 km/h</option>
-        <option value="200">200 km/h</option>
-        <option value="220">220 km/h</option>
-        <option value="260">260 km/h</option>
-      </select>
-    </div>
-
-    <div class="settings-group">
-      <label for="modeNameInput">Drive mode label</label>
-      <input id="modeNameInput" type="text" maxlength="18" value="SPORT GT+" />
-    </div>
-
-    <div class="settings-group">
-      <label for="phoneModeSelect">Phone button action</label>
-      <select id="phoneModeSelect">
-        <option value="shortcut">Siri Shortcut: Drive Call</option>
-        <option value="dialer">Open dialer</option>
-      </select>
-    </div>
-
-    <div class="settings-toggle">
-      <div>
-        <strong>Speed smoothing</strong>
-        <span>Reduces GPS jumping</span>
-      </div>
-      <input id="smoothToggle" type="checkbox" />
-    </div>
-
-    <div class="settings-toggle">
-      <div>
-        <strong>Compass widget</strong>
-        <span>Show bearing tile</span>
-      </div>
-      <input id="compassToggle" type="checkbox" />
-    </div>
-
-    <button id="enableCompassButton" class="panel-action subtle" type="button">Enable iPhone Compass</button>
-
-    <div class="settings-toggle">
-      <div>
-        <strong>Trip stats</strong>
-        <span>Max, average and distance</span>
-      </div>
-      <input id="statsToggle" type="checkbox" />
-    </div>
-
-    <div class="settings-toggle">
-      <div>
-        <strong>Shortcut buttons</strong>
-        <span>Spotify, Waze, Phone, Maps</span>
-      </div>
-      <input id="actionsToggle" type="checkbox" />
-    </div>
-
-    <button id="resetTripButton" class="panel-action" type="button">Reset Trip Data</button>
-    <button id="resetSettingsButton" class="panel-action subtle" type="button">Restore Defaults</button>
-  </aside>
+    <div id="panelScrim" class="panel-scrim"></div>
+  </div>
 
   <script src="app.js"></script>
 </body>
